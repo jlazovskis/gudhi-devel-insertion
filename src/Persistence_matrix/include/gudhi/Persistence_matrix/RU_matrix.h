@@ -223,11 +223,22 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * The maximality of the cell is not verified.
    * Also updates the barcode if it is stored.
    *
-   * See also @ref remove_last.
+   * See also @ref remove_last, @ref insert_maximal_cell.
    *
    * @param columnIndex @ref MatIdx index of the cell to remove.
    */
   void remove_maximal_cell(Index columnIndex);
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * Assumes that the cell will be maximal in the current complex and inserts it such that the matrix remains consistent
+   * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix").
+   * Updates the barcode if it is stored.
+   *
+   * See also @ref insert_boundary, @ref remove_maximal_cell.
+   *
+   * @param columnIndex @ref MatIdx index of the cell to remove.
+   */
+  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true.
    * Removes the last cell in the filtration from the matrix and updates the barcode if it is stored.
@@ -555,6 +566,23 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex, const 
   }
 
   _insert_boundary(reducedMatrixR_.insert_boundary(cellIndex, boundary, dim));
+}
+
+template <class Master_matrix>
+template <class Boundary_range>
+inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim)
+{
+  static_assert(Master_matrix::Option_list::has_vine_update,
+                "'insert_maximal_cell' is not implemented for the chosen options.");
+
+  // TODO: Check that boundary is all in the same dimension (does this even need a check?)
+
+  insert_boundary(boundary, dim);
+
+  for (Index curr = get_number_of_columns()-1; curr > columnIndex; --curr) {
+    Swap_opt::vine_swap(curr);
+  }
+
 }
 
 template <class Master_matrix>
