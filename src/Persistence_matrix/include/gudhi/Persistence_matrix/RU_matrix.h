@@ -238,6 +238,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    *
    * @param columnIndex @ref MatIdx index of the cell to remove.
    */
+  template <class Boundary_range = Boundary>
   void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true.
