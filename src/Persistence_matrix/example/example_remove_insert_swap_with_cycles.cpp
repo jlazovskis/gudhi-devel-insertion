@@ -69,12 +69,13 @@ void print_representative_cycles_example()
     std::cout << "\n";
   }
 
-  std::cout << "Representative cycles after inserting  1,3} at position 5:\n";
+  std::cout << "Representative cycles after inserting {1,3} at position 5:\n";
   mp.insert_maximal_cell( 5, {1,3}, 1);
+  //mp.insert_boundary({1,3},1);
   mp.update_representative_cycles();
   rc = mp.get_representative_cycles();
   for (auto cycle : rc) {
-    std::cout << mp.get_column_dimension(cycle[0]);
+    //std::cout << mp.get_column_dimension(cycle[0]);
     std::cout << "-cycle: ";
     for (auto index : cycle) { std::cout << index << ", "; }
     std::cout << "\n";

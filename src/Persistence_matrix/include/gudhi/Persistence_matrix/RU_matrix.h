@@ -168,6 +168,25 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
                        const Boundary_range& boundary,
                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * Assumes that the cell will be maximal in the current complex and inserts it such that the matrix remains consistent
+   * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix").
+   * Updates the barcode if it is stored.
+   *
+   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for insertion at the highest index).
+   *
+   * @param columnIndex @ref MatIdx index of the cell to remove.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param boundary Boundary generating the column to be inserted. The indices of the boundary have to correspond to the
+   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
+   * increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim);
+  /**
    * @brief Returns the column at the given @ref MatIdx index in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.
    * The type of the column depends on the chosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -228,18 +247,6 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @param columnIndex @ref MatIdx index of the cell to remove.
    */
   void remove_maximal_cell(Index columnIndex);
-  /**
-   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
-   * Assumes that the cell will be maximal in the current complex and inserts it such that the matrix remains consistent
-   * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix").
-   * Updates the barcode if it is stored.
-   *
-   * See also @ref insert_boundary, @ref remove_maximal_cell.
-   *
-   * @param columnIndex @ref MatIdx index of the cell to remove.
-   */
-  template <class Boundary_range = Boundary>
-  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true.
    * Removes the last cell in the filtration from the matrix and updates the barcode if it is stored.
@@ -580,7 +587,7 @@ inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, con
 
   insert_boundary(boundary, dim);
 
-  for (Index curr = get_number_of_columns()-1; curr > columnIndex; --curr) {
+  for (Index curr = get_number_of_columns()-2; curr > columnIndex-1; --curr) {
     Swap_opt::vine_swap(curr);
   }
 
